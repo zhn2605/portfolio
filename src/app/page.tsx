@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ShuffleTest from '@/utils/shuffle';
 
 const Home = () => {
   const [section, setSection] = useState<'about' | 'projects' | 'home'>("home");
+
+  // refs for each section
+  const sidebarRef = useRef(null);
+  const mainContentRef = useRef(null);
 
   function contentChange(section: 'about' | 'projects' | 'home') {
     setSection(section);
@@ -21,7 +25,7 @@ const Home = () => {
               p-[0.2vw]
               text-[#f24bbb]
               hover:bg-[#f24bbb] hover:text-[#1A1A1A]
-              ${section === 'about' ? 'underline decoration-current underline-offset-8' : ''}
+              ${section === 'about' ? 'underline decoration-current underline-offset-[0.4vw]' : ''}
             `}
           >
             [about me]
@@ -35,7 +39,7 @@ const Home = () => {
               p-[0.2vw] 
               text-[#32A956] 
               hover:bg-[#32A956] hover:text-[#1A1A1A]
-              ${section === 'projects' ? 'underline decoration-current underline-offset-8' : ''}
+              ${section === 'projects' ? 'underline decoration-current underline-offset-[0.4vw]' : ''}
               `}
           >
             [projects]
