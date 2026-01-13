@@ -5,7 +5,7 @@ const SYMBOLS = "!@#$%^&*()_+x.,/<>?;:[]{}|-=";
 
 // ease function for smoother animation
 const easeInOutCubic = (t: number) => {
-    return t < 0.5 ? 16 * t * t * t * t * t: 1 - Math.pow(-2 * t + 2, 5) / 2;
+    return t < 0.5 ? 16 * t* t * t * t * t: 1 - Math.pow(-2 * t + 2, 5) / 2;
 };
 
 type ShuffleTextOptions = {
@@ -20,9 +20,9 @@ type ShuffleTextOptions = {
 const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => {
     // settings
     const {
-        lookupInitialSpeed = 30,
-        fixerInitialSpeed = 15,
-        scrambleChance = 0.10,
+        lookupInitialSpeed = 8,
+        fixerInitialSpeed = 4,
+        scrambleChance = 0.15,
         leaveChance = 0.05,
         scrambleChangeChance = 0.2
     } = options;
@@ -172,8 +172,8 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
             const progress = Math.min(frame / totalFrames, 1);
             const easedProgress = easeInOutCubic(progress);
 
-            const lookupSpeed = Math.min(totalChars, Math.floor(lookupInitialSpeed * (1 + easedProgress * 1.5)));
-            const fixerSpeed = Math.min(totalChars, Math.floor(fixerInitialSpeed * (1 + easedProgress * 1.5)));
+            const lookupSpeed = Math.min(totalChars, Math.floor(lookupInitialSpeed * (.5 + easedProgress * 1.5)));
+            const fixerSpeed = Math.min(totalChars, Math.floor(fixerInitialSpeed * (.5 + easedProgress * 1.5)));
 
             // move pointers
             lookupPos = Math.min(lookupPos + lookupSpeed, totalChars);
