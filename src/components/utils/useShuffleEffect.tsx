@@ -5,7 +5,7 @@ const SYMBOLS = "!@#$%^&*()_+x.,/<>?;:[]{}|-=";
 
 // ease function for smoother animation
 const easeInOutCubic = (t: number) => {
-    return t < 0.5 ? 16 * t* t * t * t * t: 1 - Math.pow(-2 * t + 2, 5) / 2;
+    return t < 0.5 ? 16 * t* t * t * t * t: 1 - Math.pow(-2 * t + 2, 4) / 2;
 };
 
 type ShuffleTextOptions = {
@@ -20,10 +20,10 @@ type ShuffleTextOptions = {
 const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => {
     // settings
     const {
-        lookupInitialSpeed = 8,
-        fixerInitialSpeed = 4,
-        scrambleChance = 0.15,
-        leaveChance = 0.05,
+        lookupInitialSpeed = 40,
+        fixerInitialSpeed = 80,
+        scrambleChance = 0.10,
+        leaveChance = 0.10,
         scrambleChangeChance = 0.2
     } = options;
 
@@ -192,7 +192,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
             // fixer pass: turn everything into spaces
             for (let i = Math.max(0, fixerPos - fixerSpeed); i < fixerPos; i++) {
                 const pos = getCharAt(i);
-                if (pos) {
+                if (pos && lines[pos.row][pos.col] !== '\n') {
                     workingLines[pos.row][pos.col] = ' ';
                 }
             }

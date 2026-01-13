@@ -58,10 +58,26 @@ Bye!
 
   function contentChange(newSection: 'about' | 'projects' | 'home') {
     if (newSection === section) return;
-    
     setSection(newSection);
+
+    // trigger transitions together
     mainContentRef.current?.transition(bodyContent[newSection]);
     titleRef.current?.transition(titleContent[newSection]);
+
+    // trigger bbutton transitions
+    if (newSection === 'home') {
+      aboutRef.current?.transition('[about me]');
+      projectsRef.current?.transition('[projects]');
+      homeRef.current?.transition('');
+    } else if (newSection === 'about') {
+      aboutRef.current?.transition('[about me]');
+      projectsRef.current?.transition('[projects]');
+      homeRef.current?.transition('[back]');
+    } else if (newSection === 'projects') {
+      aboutRef.current?.transition('[about me]');
+      projectsRef.current?.transition('[projects]');
+      homeRef.current?.transition('[back]');
+    }
   }
 
   return (
@@ -112,7 +128,7 @@ Bye!
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto pt-[4vw] pl-[8vw] pr-[4vw]">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-[4vw] pl-[8vw] pr-[4vw]">
         {/* Title Section */}
         <div style={{minHeight: '8vw'}}>
           <ShuffleText 
