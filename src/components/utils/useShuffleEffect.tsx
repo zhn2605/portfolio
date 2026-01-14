@@ -5,7 +5,7 @@ const SYMBOLS = "!@#$%^&*()_+x.,/<>?;:[]{}|-=";
 
 // ease function for smoother animation
 const easeInOutCubic = (t: number) => {
-    return t < 0.5 ? 16 * t* t * t * t * t: 1 - Math.pow(-2 * t + 2, 4) / 2;
+    return t < 0.5 ? 16 * t* t * t * t: 1 - Math.pow(-2 * t + 2, 4) / 2;
 };
 
 type ShuffleTextOptions = {
@@ -20,8 +20,8 @@ type ShuffleTextOptions = {
 const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => {
     // settings
     const {
-        lookupInitialSpeed = 40,
-        fixerInitialSpeed = 80,
+        lookupInitialSpeed = 30,
+        fixerInitialSpeed = 15,
         scrambleChance = 0.10,
         leaveChance = 0.10,
         scrambleChangeChance = 0.2

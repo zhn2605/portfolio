@@ -4,7 +4,7 @@ import { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { TerminalLayer } from './utils/TerminalLayer';
 
 interface ShuffleTextProps {
-    children: string;
+    children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
     lookupInitialSpeed?: number;
@@ -14,7 +14,7 @@ interface ShuffleTextProps {
 export interface ShuffleTextRef {
     appear: () => void;
     dissolve: () => void;
-    transition: (newContent: string) => void;
+    transition: (newContent: React.ReactNode) => void;
 }
 
 const ShuffleText = forwardRef<any, ShuffleTextProps>(({
@@ -43,7 +43,7 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
                 effectRefs.current[layer.id].dissolve();
             }
         },
-        transition: (newContent: string) => {
+        transition: (newContent: React.ReactNode) => {
             const oldLayerId = activeLayerId;
             const newLayerId = nextIdRef.current++;
 
@@ -90,7 +90,6 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
             {layers.map((layer) => (
                 <TerminalLayer
                     key={layer.id}
-                    content={layer.content}
                     className={className}
                     lookupInitialSpeed={lookupInitialSpeed}
                     fixerInitialSpeed={fixerInitialSpeed}
@@ -99,7 +98,9 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
                     onMount={(methods) => {
                         effectRefs.current[layer.id] = methods;
                     }}            
-                />
+                >
+                    {layer.content}
+                </TerminalLayer>
             ))}
         </div>
     );
@@ -108,4 +109,3 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
 ShuffleText.displayName = 'ShuffleText';
 
 export default ShuffleText;
-    

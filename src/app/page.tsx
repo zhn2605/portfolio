@@ -7,21 +7,12 @@ const Home = () => {
   const [section, setSection] = useState<'about' | 'projects' | 'home'>("home");
   
   const mainContentRef = useRef<ShuffleTextRef>(null);
-  const titleRef = useRef<ShuffleTextRef>(null);
   const homeRef = useRef<ShuffleTextRef>(null);
   const aboutRef = useRef<ShuffleTextRef>(null);
   const projectsRef = useRef<ShuffleTextRef>(null);
-
-  const titleContent = {
-    home: "Hi, I'm Zihan",
-    about: "about me",
-    projects: "projects"
-  };
   
   const bodyContent = {
-    home: `Electrical & Coomputer Engineering | Cooper Union
-Information will be updated soon. For now, here's a portion of the Bee Movie script with a terminal shuffle effect.
-
+    home: `Information will be updated soon. For now, here's a portion of the Bee Movie script with a terminal shuffle effect.
 According to all known laws of aviation, there is no way a bee should be able to fly.
 Its wings are too small to get its fat little body off the ground.
 The bee, of course, flies anyway because bees don't care what humans think is impossible.
@@ -56,15 +47,85 @@ Bye!
     projects: `W.I.P.`.trim()
   };
 
+  const getFullContent = (sectionName: 'about' | 'projects' | 'home') => {
+    if (sectionName === 'home') {
+      return (
+        <>
+          <div key="title" className="font-title text-title">
+            Hi, I'm <span className="text-[#FFB768]">Zihan</span>
+          </div>
+          <div key="subTitle" className="pb-[3vw]">
+          Electrical & Coomputer Engineering | Cooper Union
+          </div>
+          <div key="body" className="overflow-y-auto no-scrollbar pb-[8vw]">
+            {bodyContent.home}
+          </div>
+        </>
+      );
+    }
+    
+    if (sectionName === 'about') {
+      return (
+        <>
+          <div key="title" className="font-title text-title pb-[4vw]">
+            about me
+          </div>
+          <span key="body">
+            {bodyContent.about}
+          </span>
+          {/* stuff */}
+        </>
+      );
+    }
+
+    if (sectionName === 'projects') {
+      return (
+        <>
+          <div key="title" className="font-title text-title pb-[4vw]">
+            projects
+          </div>
+          <span key="body">
+            {bodyContent.projects}
+          </span>
+          <ul key="list" className="link-list">
+            <li key="nos-repo">
+              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/non-operating-system">
+              non-operating-system
+              </a>
+            </li>
+            <li key="sf-repo">
+              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/pure-pursuit-visualizer">
+              swedish_fish
+              </a>
+            </li>
+            <li key="ppv-repo">
+              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/swedish_fish">
+              pure-pursuit-visualizer
+              </a>
+            </li>
+            <li key="ss-repo">
+              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/sheet-sharp">
+              sheet-sharp
+              </a>
+            </li>
+          </ul>
+          
+          {/* stuff */}
+        </>
+      );
+    }
+
+    return null;
+  }
+
   function contentChange(newSection: 'about' | 'projects' | 'home') {
     if (newSection === section) return;
     setSection(newSection);
 
-    // trigger transitions together
-    mainContentRef.current?.transition(bodyContent[newSection]);
-    titleRef.current?.transition(titleContent[newSection]);
+    // trigger transition with full content structure
+    mainContentRef.current?.transition(getFullContent(newSection));
 
-    // trigger bbutton transitions
+    // trigger button transitions
     if (newSection === 'home') {
       aboutRef.current?.transition('[about me]');
       projectsRef.current?.transition('[projects]');
@@ -130,22 +191,10 @@ Bye!
       {/* Main Content */}
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-[4vw] pl-[8vw] pr-[4vw]">
         {/* Title Section */}
-        <div style={{minHeight: '8vw'}}>
-          <ShuffleText 
-            ref={titleRef}
-            className="font-title text-title pb-[5vw]"
-          >
-            {titleContent[section]}
-          </ShuffleText>
-        </div>
-
-
-        {/* Body Section */}
         <ShuffleText 
-          ref={mainContentRef}
-          className="font-mono text-base"
+            ref={mainContentRef}
         >
-          {bodyContent[section]}
+          {getFullContent(section)}
         </ShuffleText>
       </div>
     </div>

@@ -41,6 +41,16 @@
   .text-title {
     font-size: clamp(36px, 4vw, 60px);
   }
+
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .link-list li {
+    margin-bottom: 0.1em;
+  }
 }
 @media (prefers-color-scheme: dark) {
   :root {
