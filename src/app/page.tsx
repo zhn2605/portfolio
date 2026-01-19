@@ -42,7 +42,9 @@ Wave to us! We'll be in row 118,000.
 Bye!
 `.trim(),
     
-    about: `I like making things.`.trim(),
+    about: `I like making things.
+
+Here's how to contact me:`.trim(),
     
     projects: `W.I.P.`.trim()
   };
@@ -73,7 +75,25 @@ Bye!
           <span key="body">
             {bodyContent.about}
           </span>
-          {/* stuff */}
+          
+          <ul key="list" className="link-list">
+            <li key="github">
+              <a className="pd-[0.2vw] text-[#f24bbb] hover:bg-[#f24bbb] hover:text-[#1A1A1A]" href="https://github.com/zhn2605">
+              github
+              </a>
+            </li>
+            <li key="email">
+              <a className="pd-[0.2vw] text-[#f24bbb] hover:bg-[#f24bbb] hover:text-[#1A1A1A]" href="https://mail.google.com/mail/u/zihan.zhao2605@gmail.com/#inbox" target="_blank" rel="noopener noreferrer">
+              email
+              </a>
+            </li>
+            <li key="linked-in">
+              <a className="pd-[0.2vw] text-[#f24bbb] hover:bg-[#f24bbb] hover:text-[#1A1A1A]" href="https://www.linkedin.com/in/zihan-zhao-1b19b8292/">
+              linked in
+              </a>
+            </li>
+          </ul>
+
         </>
       );
     }
@@ -89,22 +109,22 @@ Bye!
           </span>
           <ul key="list" className="link-list">
             <li key="nos-repo">
-              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/non-operating-system">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/non-operating-system">
               non-operating-system
               </a>
             </li>
             <li key="sf-repo">
-              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/pure-pursuit-visualizer">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/pure-pursuit-visualizer">
               swedish_fish
               </a>
             </li>
             <li key="ppv-repo">
-              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/swedish_fish">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/swedish_fish">
               pure-pursuit-visualizer
               </a>
             </li>
             <li key="ss-repo">
-              <a className="p-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/sheet-sharp">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/sheet-sharp">
               sheet-sharp
               </a>
             </li>
