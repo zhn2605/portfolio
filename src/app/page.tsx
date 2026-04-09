@@ -12,34 +12,7 @@ const Home = () => {
   const projectsRef = useRef<ShuffleTextRef>(null);
   
   const bodyContent = {
-    home: `Information will be updated soon. For now, here's a portion of the Bee Movie script with a terminal shuffle effect.
-According to all known laws of aviation, there is no way a bee should be able to fly.
-Its wings are too small to get its fat little body off the ground.
-The bee, of course, flies anyway because bees don't care what humans think is impossible.
-Yellow, black. Yellow, black. Yellow, black. Yellow, black.
-Ooh, black and yellow!
-Let's shake it up a little.
-Barry! Breakfast is ready!
-Coming!
-Hang on a second.
-Hello?
-Barry?
-Adam?
-Can you believe this is happening?
-I can't.
-I'll pick you up.
-Looking sharp.
-Use the stairs, Your father paid good money for those.
-Sorry. I'm excited.
-Here's the graduate.
-We're very proud of you, son.
-A perfect report card, all B's.
-Very proud.
-Ma! I got a thing going here.
-You got lint on your fuzz.
-Ow! That's me!
-Wave to us! We'll be in row 118,000.
-Bye!
+    home: `Information will be updated soon.
 `.trim(),
     
     about: `I like making things.
@@ -57,7 +30,7 @@ Here's how to contact me:`.trim(),
             Hi, I'm <span className="text-[#FFB768]">Zihan</span>
           </div>
           <div key="subTitle" className="pb-[3vw]">
-          Electrical & Coomputer Engineering | Cooper Union
+          Electrical & Computer Engineering | Cooper Union
           </div>
           <div key="body" className="overflow-y-auto no-scrollbar pb-[8vw]">
             {bodyContent.home}
@@ -114,13 +87,18 @@ Here's how to contact me:`.trim(),
               </a>
             </li>
             <li key="sf-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/pure-pursuit-visualizer">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/swedish_fish">
               swedish_fish
               </a>
             </li>
             <li key="ppv-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/swedish_fish">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/pure-pursuit-visualizer">
               pure-pursuit-visualizer
+              </a>
+            </li>
+            <li key="cou-repo">
+              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/alias1233/congenial-octo-umbrella">
+              congenial-octo-umbrella
               </a>
             </li>
             <li key="ss-repo">

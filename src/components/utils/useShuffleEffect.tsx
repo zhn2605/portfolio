@@ -1,14 +1,16 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const SYMBOLS = "!@#$%^&*()_+x.,/<>?;:[]{}|-=";
+const BASE_INTERVAL = 1000 / 60;
 
-// ease function for smoother animation
+// cubic ease-in-out
 const easeInOutCubic = (t: number) => {
-    return t < 0.5 ? 16 * t* t * t * t: 1 - Math.pow(-2 * t + 2, 4) / 2;
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 };
 
 type ShuffleTextOptions = {
+    duration?: number;
     lookupInitialSpeed?: number;
     fixerInitialSpeed?: number;
     scrambleChance?: number;
@@ -16,16 +18,20 @@ type ShuffleTextOptions = {
     scrambleChangeChance?: number;
 };
 
-// sliding window shuffle effect
+// sliding window shuffle effect (time-based)
 const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => {
-    // settings
     const {
-        lookupInitialSpeed = 30,
-        fixerInitialSpeed = 15,
-        scrambleChance = 0.10,
+        duration: durationOverride,
+        lookupInitialSpeed = 4,
+        fixerInitialSpeed = 2,
+        scrambleChance = 0.05,
         leaveChance = 0.10,
-        scrambleChangeChance = 0.2
+        scrambleChangeChance = 0.05
     } = options;
+
+    // scale duration with text length (~1ms/char, 300ms floor)
+    const duration_scale = 1.1;
+    const duration = durationOverride ?? Math.max(content.length * duration_scale, 300);
 
     const [displayContent, setDisplayContent] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
@@ -37,82 +43,100 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
     };
 
     const flatten2D = (arr: string[][]) => {
-        return arr.map(line =>line.join('')).join('\n');
+        return arr.map(line => line.join('')).join('\n');
+    };
+
+    const getCharAt = (pos: number, lines: string[][]) => {
+        let count = 0;
+        for (let i = 0; i < lines.length; i++) {
+            if (count + lines[i].length > pos) {
+                return { row: i, col: pos - count };
+            }
+            count += lines[i].length;
+        }
+        return null;
     };
 
     const appear = () => {
+        cancelledRef.current = false;
         setIsAnimating(true);
 
         const lines = contentTo2D(content);
         const totalChars = lines.reduce((sum, line) => sum + line.length, 0);
-
-        // initalize all as spaces
         const workingLines = lines.map(line => line.map(() => ' '));
+        const speedRatio = lookupInitialSpeed / fixerInitialSpeed;
+
+        // normalize base speed so fixer completes in ~duration ms
+        // average of (0.5 + easing * 1.5) over [0,1] = 1.25 for symmetric ease
+        const baseSpeed = totalChars * BASE_INTERVAL / (1.25 * duration);
 
         let lookupPos = 0;
         let fixerPos = 0;
-        let frame = 0;
-        const totalFrames = Math.max(50, Math.floor(totalChars / 10));
+        let lastTime: number | null = null;
+        let startTime = 0;
 
-        const getCharAt = (pos: number) => {
-            let count = 0;
-            for (let i = 0; i < lines.length; i++) {
-                if (count + lines[i].length > pos) {
-                    return { row: i, col: pos - count };
-                }
-                count += lines[i].length;
-            }
-            return null;
-        };
-
-        const animate = () => {
+        const animate = (now: number) => {
             if (cancelledRef.current) {
                 setIsAnimating(false);
                 return;
             }
 
-            frame++;
-            const progress =Math.min(frame / totalFrames, 1);
-            const easedProgress = easeInOutCubic(progress);
+            // skip first frame to establish timing
+            if (lastTime === null) {
+                lastTime = now;
+                startTime = now;
+                animationRef.current = requestAnimationFrame(animate);
+                return;
+            }
 
-            // update lookup and fixer positions
-            const lookupSpeed = Math.min(totalChars, Math.floor(lookupInitialSpeed * (.5 + easedProgress * 1.5)));
-            const fixerSpeed = Math.min(totalChars, Math.floor(fixerInitialSpeed * (.5 + easedProgress * 1.5)));
+            const dt = now - lastTime;
+            lastTime = now;
+            const dtScale = dt / BASE_INTERVAL;
 
-            // move lookup pointer
-            lookupPos = Math.min(lookupPos + lookupSpeed, totalChars);
+            // easing modulates speed, not position
+            const timeProgress = Math.min((now - startTime) / duration, 1);
+            const speedMult = 0.5 + easeInOutCubic(timeProgress) * 1.5;
 
-            // move fixer pointer
-            fixerPos = Math.min(fixerPos + fixerSpeed, totalChars);
+            const prevLookup = Math.floor(lookupPos);
+            const prevFixer = Math.floor(fixerPos);
 
-            // lookup pass: scramble characters
-            for (let i = Math.max(0, lookupPos - lookupSpeed); i < lookupPos; i++) {
-                const pos = getCharAt(i);
+            lookupPos = Math.min(lookupPos + baseSpeed * speedRatio * speedMult * dtScale, totalChars);
+            fixerPos = Math.min(fixerPos + baseSpeed * speedMult * dtScale, totalChars);
+
+            const curLookup = Math.floor(lookupPos);
+            const curFixer = Math.floor(fixerPos);
+
+            // scale probabilities for frame-rate independence
+            const scaledChangeChance = 1 - Math.pow(1 - scrambleChangeChance, dtScale);
+            const scaledScrambleChance = 1 - Math.pow(1 - scrambleChance, dtScale);
+
+            // lookup pass: scramble new characters
+            for (let i = prevLookup; i < curLookup; i++) {
+                const pos = getCharAt(i, lines);
                 if (pos && lines[pos.row][pos.col] !== ' ' && lines[pos.row][pos.col] !== '\n') {
                     if (Math.random() < scrambleChance) {
-                      workingLines[pos.row][pos.col] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                        workingLines[pos.row][pos.col] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
                     }
                 }
             }
 
             // update existing scrambled chars between fixer and lookup
-            for (let i = fixerPos; i < lookupPos; i++) {
-              const pos = getCharAt(i);
-              if (pos) {
-                const char = workingLines[pos.row][pos.col];
-                if (SYMBOLS.includes(char) && Math.random() < scrambleChangeChance) {
-                  workingLines[pos.row][pos.col] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            for (let i = curFixer; i < curLookup; i++) {
+                const pos = getCharAt(i, lines);
+                if (pos) {
+                    const char = workingLines[pos.row][pos.col];
+                    if (SYMBOLS.includes(char) && Math.random() < scaledChangeChance) {
+                        workingLines[pos.row][pos.col] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                    }
+                    if (char === ' ' && lines[pos.row][pos.col] !== ' ' && lines[pos.row][pos.col] !== '\n' && Math.random() < scaledScrambleChance) {
+                        workingLines[pos.row][pos.col] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                    }
                 }
-                // saces can still become scrambled if they haven't been fixed yet
-                if (char === ' ' && lines[pos.row][pos.col] !== ' ' && lines[pos.row][pos.col] !== '\n' && Math.random() < scrambleChance) {
-                  workingLines[pos.row][pos.col] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                }
-              }
             }
 
-            // fixer pass: fix characters
-            for (let i = Math.max(0, fixerPos - fixerSpeed); i < fixerPos; i++) {
-                const pos = getCharAt(i);
+            // fixer pass: resolve characters to final content
+            for (let i = prevFixer; i < curFixer; i++) {
+                const pos = getCharAt(i, lines);
                 if (pos) {
                     workingLines[pos.row][pos.col] = lines[pos.row][pos.col];
                 }
@@ -120,10 +144,9 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
 
             setDisplayContent(flatten2D(workingLines));
 
-            if (fixerPos < totalChars) {
+            if (curFixer < totalChars) {
                 animationRef.current = requestAnimationFrame(animate);
             } else {
-                // check for correctness
                 for (let i = 0; i < lines.length; i++) {
                     for (let j = 0; j < lines[i].length; j++) {
                         workingLines[i][j] = lines[i][j];
@@ -134,7 +157,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
             }
         };
 
-        animate();
+        animationRef.current = requestAnimationFrame(animate);
     };
 
     const dissolve = (onHalfway?: () => void) => {
@@ -144,44 +167,47 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
         const lines = contentTo2D(content);
         const totalChars = lines.reduce((sum, line) => sum + line.length, 0);
         const workingLines = contentTo2D(content);
+        const speedRatio = lookupInitialSpeed / fixerInitialSpeed;
+        const baseSpeed = totalChars * BASE_INTERVAL / (1.25 * duration);
 
         let lookupPos = 0;
         let fixerPos = 0;
-        let frame = 0;
-        const totalFrames = Math.max(50, Math.floor(totalChars / 10));
+        let lastTime: number | null = null;
+        let startTime = 0;
         let halfwayTriggered = false;
 
-        const getCharAt = (pos: number) => {
-            let count = 0;
-            for (let i = 0; i < lines.length; i++) {
-                if (count + lines[i].length > pos) {
-                    return { row: i, col: pos - count };
-                }
-                count += lines[i].length;
-            }
-            return null;
-        };
-
-        const animate = () => {
+        const animate = (now: number) => {
             if (cancelledRef.current) {
                 setIsAnimating(false);
                 return;
             }
-            
-            frame++;
-            const progress = Math.min(frame / totalFrames, 1);
-            const easedProgress = easeInOutCubic(progress);
 
-            const lookupSpeed = Math.min(totalChars, Math.floor(lookupInitialSpeed * (.5 + easedProgress * 1.5)));
-            const fixerSpeed = Math.min(totalChars, Math.floor(fixerInitialSpeed * (.5 + easedProgress * 1.5)));
+            if (lastTime === null) {
+                lastTime = now;
+                startTime = now;
+                animationRef.current = requestAnimationFrame(animate);
+                return;
+            }
 
-            // move pointers
-            lookupPos = Math.min(lookupPos + lookupSpeed, totalChars);
-            fixerPos = Math.min(fixerPos + fixerSpeed, totalChars);
+            const dt = now - lastTime;
+            lastTime = now;
+            const dtScale = dt / BASE_INTERVAL;
+
+            const timeProgress = Math.min((now - startTime) / duration, 1);
+            const speedMult = 0.5 + easeInOutCubic(timeProgress) * 1.5;
+
+            const prevLookup = Math.floor(lookupPos);
+            const prevFixer = Math.floor(fixerPos);
+
+            lookupPos = Math.min(lookupPos + baseSpeed * speedRatio * speedMult * dtScale, totalChars);
+            fixerPos = Math.min(fixerPos + baseSpeed * speedMult * dtScale, totalChars);
+
+            const curLookup = Math.floor(lookupPos);
+            const curFixer = Math.floor(fixerPos);
 
             // lookup pass: leave some chars behind
-            for (let i = Math.max(0, lookupPos - lookupSpeed); i < lookupPos; i++) {
-                const pos = getCharAt(i);
+            for (let i = prevLookup; i < curLookup; i++) {
+                const pos = getCharAt(i, lines);
                 if (pos && workingLines[pos.row][pos.col] !== ' ' && lines[pos.row][pos.col] !== '\n') {
                     if (Math.random() > leaveChance) {
                         workingLines[pos.row][pos.col] = ' ';
@@ -189,9 +215,9 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
                 }
             }
 
-            // fixer pass: turn everything into spaces
-            for (let i = Math.max(0, fixerPos - fixerSpeed); i < fixerPos; i++) {
-                const pos = getCharAt(i);
+            // fixer pass: clear everything
+            for (let i = prevFixer; i < curFixer; i++) {
+                const pos = getCharAt(i, lines);
                 if (pos && lines[pos.row][pos.col] !== '\n') {
                     workingLines[pos.row][pos.col] = ' ';
                 }
@@ -199,43 +225,41 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
 
             setDisplayContent(flatten2D(workingLines));
 
-            // Trigger halfway callback
-            if (!halfwayTriggered && fixerPos >= totalChars / 2 && onHalfway) {
+            if (!halfwayTriggered && curFixer >= totalChars / 2 && onHalfway) {
                 halfwayTriggered = true;
                 onHalfway();
             }
 
-            if (fixerPos < totalChars) {
+            if (curFixer < totalChars) {
                 animationRef.current = requestAnimationFrame(animate);
             } else {
-                // ensure all are spaces
                 setTimeout(() => {
                     setDisplayContent('');
                     setIsAnimating(false);
-                  }, 100);          
+                }, 100);
             }
         };
-        
-        animate();
+
+        animationRef.current = requestAnimationFrame(animate);
     };
 
     const cancel = () => {
         cancelledRef.current = true;
         if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
+            cancelAnimationFrame(animationRef.current);
         }
         setIsAnimating(false);
-      };    
+    };
 
     useEffect(() => {
-      return () => {
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-        }
-      };
+        return () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        };
     }, []);
 
-    return { displayContent, appear, dissolve, isAnimating, cancel };    
+    return { displayContent, appear, dissolve, isAnimating, cancel };
 };
 
 export default useShuffleEffect;

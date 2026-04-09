@@ -21,8 +21,8 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
     children,
     className = '',
     style = {},
-    lookupInitialSpeed = 30,
-    fixerInitialSpeed = 15
+    lookupInitialSpeed = 4,
+    fixerInitialSpeed = 2,
 }, ref) => {
     const [layers, setLayers] = useState([{ id: 0, content: children}]);
     const [activeLayerId, setActiveLayerId] = useState(0);

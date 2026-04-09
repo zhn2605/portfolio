@@ -34,7 +34,7 @@ const applyShuffledText = (node: React.ReactNode, shuffledText: string, indexRef
     indexRef.current += length;
     return result;
   }
-  
+
   if (typeof node === 'number') {
     const str = String(node);
     const length = str.length;
@@ -42,42 +42,41 @@ const applyShuffledText = (node: React.ReactNode, shuffledText: string, indexRef
     indexRef.current += length;
     return result;
   }
-  
+
   if (Array.isArray(node)) {
     return node.map((child, index) => {
       const processed = applyShuffledText(child, shuffledText, indexRef);
-      // wrap in fragment if its not already a valid React element with a key
       if (React.isValidElement(processed) && processed.key != null) {
         return processed;
       }
       return <React.Fragment key={index}>{processed}</React.Fragment>;
     });
   }
-  
+
   if (React.isValidElement(node)) {
     const props = node.props as any;
     const children = applyShuffledText(props.children, shuffledText, indexRef);
     return React.cloneElement(node, { key: node.key }, children);
   }
-  
+
   return node;
 };
 
-export const TerminalLayer = ({ 
-    children, 
-    className = '', 
-    lookupInitialSpeed = 50, 
-    fixerInitialSpeed = 25, 
-    onMount, 
+export const TerminalLayer = ({
+    children,
+    className = '',
+    lookupInitialSpeed,
+    fixerInitialSpeed,
+    onMount,
     isInitial = false,
     autoAppear = false
 }: TerminalLayerProps) => {
     const content = extractText(children);
     const { displayContent, appear, dissolve, isAnimating, cancel } = useShuffleEffect(content, {
         lookupInitialSpeed,
-        fixerInitialSpeed
+        fixerInitialSpeed,
     });
-  
+
     const hasStarted = useRef(false);
     const isMounted = useRef(true);
     const methodsRef = useRef({ appear, dissolve, isAnimating, cancel });
@@ -107,10 +106,10 @@ export const TerminalLayer = ({
     const renderedContent = applyShuffledText(children, displayContent, { current: 0 });
 
     return (
-        <div 
+        <div
             className={`absolute top-0 left-0 w-full h-full ${className}`}
-            style={{ 
-                whiteSpace: 'pre-wrap', 
+            style={{
+                whiteSpace: 'pre-wrap',
                 fontFamily: 'monospace',
             }}
         >
