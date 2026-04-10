@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import ShuffleText, { ShuffleTextRef } from '@/components/ShuffleText';
+import CommitLog from '@/components/CommitLog';
 
 const Home = () => {
   const [section, setSection] = useState<'about' | 'projects' | 'home'>("home");
@@ -10,14 +11,11 @@ const Home = () => {
   const homeRef = useRef<ShuffleTextRef>(null);
   const aboutRef = useRef<ShuffleTextRef>(null);
   const projectsRef = useRef<ShuffleTextRef>(null);
-  
-  const bodyContent = {
-    home: `Information will be updated soon.
-`.trim(),
-    
-    about: `I like making things.
 
-Here's how to contact me:`.trim(),
+  const bodyContent = {
+    home: `More information will be updated soon.
+Click 'about me' for contacts and 'projects' to check out some things I've made.`.trim(),
+    about: `Here's how to contact me:`.trim(),
     
     projects: `W.I.P.`.trim()
   };
@@ -42,8 +40,11 @@ Here's how to contact me:`.trim(),
     if (sectionName === 'about') {
       return (
         <>
-          <div key="title" className="font-title text-title pb-[4vw]">
+          <div key="title" className="font-title text-title">
             about me
+          </div>
+          <div key="subTitle" className="pb-[3vw]">
+          I enjoy making things.
           </div>
           <span key="body">
             {bodyContent.about}
@@ -74,8 +75,11 @@ Here's how to contact me:`.trim(),
     if (sectionName === 'projects') {
       return (
         <>
-          <div key="title" className="font-title text-title pb-[4vw]">
+          <div key="title" className="font-title text-title">
             projects
+          </div>
+          <div key="subTitle" className="pb-[3vw]">
+          Click on the links for more information.
           </div>
           <span key="body">
             {bodyContent.projects}
@@ -141,6 +145,12 @@ Here's how to contact me:`.trim(),
 
   return (
     <div className="flex h-screen">
+      {/* Commit Log */}
+      <div className="position: fixed bottom-0 right-0 flex p-[1vw] ">
+        <span>
+          <CommitLog repo="portfolio" />
+        </span>
+      </div>
       {/* Sidebar */}
       <div className="w-1/5 flex flex-col justify-center items-end pr-[2vw] border-[#282A36]">
         <button className="py-[1vw] px-[1vw]" onClick={() => contentChange('about')}>
