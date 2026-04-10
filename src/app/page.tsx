@@ -146,7 +146,7 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
   return (
     <div className="flex h-screen">
       {/* Commit Log */}
-      <div className="position: fixed bottom-0 right-0 flex p-[1vw] ">
+      <div className="fixed bottom-0 right-0 p-[1vw] z-10">
         <span>
           <CommitLog repo="portfolio" />
         </span>
