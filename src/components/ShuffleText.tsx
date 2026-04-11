@@ -9,6 +9,7 @@ interface ShuffleTextProps {
     style?: React.CSSProperties;
     lookupInitialSpeed?: number;
     fixerInitialSpeed?: number;
+    autoStart?: boolean;
 }
 
 export interface ShuffleTextRef {
@@ -23,6 +24,7 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
     style = {},
     lookupInitialSpeed = 4,
     fixerInitialSpeed = 2,
+    autoStart = true,
 }, ref) => {
     const [layers, setLayers] = useState([{ id: 0, content: children}]);
     const [activeLayerId, setActiveLayerId] = useState(0);
@@ -93,7 +95,7 @@ const ShuffleText = forwardRef<any, ShuffleTextProps>(({
                     className={className}
                     lookupInitialSpeed={lookupInitialSpeed}
                     fixerInitialSpeed={fixerInitialSpeed}
-                    isInitial={layer.id === 0}
+                    isInitial={layer.id === 0 && autoStart}
                     autoAppear={layer.id !== 0}
                     onMount={(methods) => {
                         effectRefs.current[layer.id] = methods;

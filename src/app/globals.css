@@ -1,10 +1,13 @@
 @import "tailwindcss";
 @import '@fontsource/jetbrains-mono';
 @import '@fontsource/ibm-plex-mono';
+@import '@fontsource/ibm-plex-mono/200.css';
+@import '@fontsource/ibm-plex-mono/300.css';
 
 :root {
   --background: #1A1A1A;
   --foreground: #171717;
+  --title-weight: 200;
 }
 
 @theme inline {
@@ -39,7 +42,8 @@
   }
 
   .text-title {
-    font-size: clamp(36px, 4vw, 60px);
+    font-size: clamp(60px, 5vw, 90px);
+    font-weight: var(--title-weight);
   }
 
   .link-list {

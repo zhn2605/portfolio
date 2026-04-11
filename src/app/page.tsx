@@ -3,14 +3,19 @@
 import { useState, useRef } from 'react';
 import ShuffleText, { ShuffleTextRef } from '@/components/ShuffleText';
 import CommitLog from '@/components/CommitLog';
+import ProjectList, { ProjectListRef } from '@/components/ProjectList';
+import { getProjectContent } from '@/components/ProjectDetail';
+import { ProjectData } from '@/data/projects';
 
 const Home = () => {
   const [section, setSection] = useState<'about' | 'projects' | 'home'>("home");
-  
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
+
   const mainContentRef = useRef<ShuffleTextRef>(null);
   const homeRef = useRef<ShuffleTextRef>(null);
   const aboutRef = useRef<ShuffleTextRef>(null);
   const projectsRef = useRef<ShuffleTextRef>(null);
+  const projectListRef = useRef<ProjectListRef>(null);
 
   const bodyContent = {
     home: `More information will be updated soon.
@@ -27,7 +32,7 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
           <div key="title" className="font-title text-title">
             Hi, I'm <span className="text-[#FFB768]">Zihan</span>
           </div>
-          <div key="subTitle" className="pb-[3vw]">
+          <div key="subTitle" className="pb-[2vw]">
           Electrical & Computer Engineering | Cooper Union
           </div>
           <div key="body" className="overflow-y-auto no-scrollbar pb-[8vw]">
@@ -43,7 +48,7 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
           <div key="title" className="font-title text-title">
             about me
           </div>
-          <div key="subTitle" className="pb-[3vw]">
+          <div key="subTitle" className="pb-[2vw]">
           I enjoy making things.
           </div>
           <span key="body">
@@ -78,41 +83,9 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
           <div key="title" className="font-title text-title">
             projects
           </div>
-          <div key="subTitle" className="pb-[3vw]">
-          Click on the links for more information.
+          <div key="subTitle" className="pb-[2vw]">
+          Select a project to learn more.
           </div>
-          <span key="body">
-            {bodyContent.projects}
-          </span>
-          <ul key="list" className="link-list">
-            <li key="nos-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/non-operating-system">
-              non-operating-system
-              </a>
-            </li>
-            <li key="sf-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/swedish_fish">
-              swedish_fish
-              </a>
-            </li>
-            <li key="ppv-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/pure-pursuit-visualizer">
-              pure-pursuit-visualizer
-              </a>
-            </li>
-            <li key="cou-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/alias1233/congenial-octo-umbrella">
-              congenial-octo-umbrella
-              </a>
-            </li>
-            <li key="ss-repo">
-              <a className="pd-[0.2vw] text-[#32A956] hover:bg-[#32A956] hover:text-[#1A1A1A]" href="https://github.com/zhn2605/sheet-sharp">
-              sheet-sharp
-              </a>
-            </li>
-          </ul>
-          
-          {/* stuff */}
         </>
       );
     }
@@ -120,12 +93,28 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
     return null;
   }
 
+  function handleProjectSelect(project: ProjectData) {
+    if (selectedProject?.id === project.id) return;
+    setSelectedProject(project);
+    mainContentRef.current?.transition(getProjectContent(project));
+  }
+
   function contentChange(newSection: 'about' | 'projects' | 'home') {
     if (newSection === section) return;
+
+    if (section === 'projects' && newSection !== 'projects') {
+      projectListRef.current?.shuffleOut();
+    }
+
     setSection(newSection);
+    setSelectedProject(null);
 
     // trigger transition with full content structure
     mainContentRef.current?.transition(getFullContent(newSection));
+
+    if (newSection === 'projects') {
+      setTimeout(() => projectListRef.current?.shuffleIn(), 150);
+    }
 
     // trigger button transitions
     if (newSection === 'home') {
@@ -157,9 +146,8 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
           <span
             className={`
               p-[0.2vw]
-              text-[#f24bbb]
               hover:bg-[#f24bbb] hover:text-[#1A1A1A]
-              ${section === 'about' ? 'underline decoration-current underline-offset-[0.4vw]' : ''}
+              ${section === 'about' ? 'bg-[#f24bbb] text-[#1A1A1A]' : 'text-[#f24bbb]'}
             `}
           >
             [about me]
@@ -169,10 +157,9 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
         <button className="py-[1vw] px-[1vw]" onClick={() => contentChange('projects')}>
           <span
             className={`
-              p-[0.2vw] 
-              text-[#32A956] 
-              hover:bg-[#32A956] hover:text-[#1A1A1A]
-              ${section === 'projects' ? 'underline decoration-current underline-offset-[0.4vw]' : ''}
+              p-[0.2vw]
+              hover:bg-[#63FA88] hover:text-[#1A1A1A]
+              ${section === 'projects' ? 'bg-[#63FA88] text-[#1A1A1A]' : 'text-[#63FA88]'}
             `}
           >
             [projects]
@@ -197,13 +184,19 @@ Click 'about me' for contacts and 'projects' to check out some things I've made.
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-[4vw] pl-[8vw] pr-[4vw]">
-        {/* Title Section */}
-        <ShuffleText 
-            ref={mainContentRef}
-        >
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-[2.8vw] pl-[8vw] pr-[4vw]">
+        <ShuffleText ref={mainContentRef}>
           {getFullContent(section)}
         </ShuffleText>
+      </div>
+
+      {/* Project List */}
+      <div className="w-1/4 flex flex-col justify-start overflow-y-auto no-scrollbar pt-[4vw]">
+        <ProjectList
+          ref={projectListRef}
+          selectedId={selectedProject?.id ?? null}
+          onSelect={handleProjectSelect}
+        />
       </div>
     </div>
   );
