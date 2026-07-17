@@ -6,7 +6,7 @@ const BASE_INTERVAL = 1000 / 60;
 
 // cubic ease-in-out
 const easeInOutCubic = (t: number) => {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    return t < 0.5 ? 16 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 };
 
 type ShuffleTextOptions = {
@@ -22,9 +22,9 @@ type ShuffleTextOptions = {
 const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => {
     const {
         duration: durationOverride,
-        lookupInitialSpeed = 4,
+        lookupInitialSpeed = 8,
         fixerInitialSpeed = 2,
-        scrambleChance = 0.05,
+        scrambleChance = 0.10,
         leaveChance = 0.10,
         scrambleChangeChance = 0.05
     } = options;
@@ -35,6 +35,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
 
     const [displayContent, setDisplayContent] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
+    const [dissolveIndex, setDissolveIndex] = useState<number | null>(null);
     const animationRef = useRef<number | null>(null);
     const cancelledRef = useRef(false);
 
@@ -60,6 +61,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
     const appear = () => {
         cancelledRef.current = false;
         setIsAnimating(true);
+        setDissolveIndex(null);
 
         const lines = contentTo2D(content);
         const totalChars = lines.reduce((sum, line) => sum + line.length, 0);
@@ -163,6 +165,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
     const dissolve = (onHalfway?: () => void) => {
         cancelledRef.current = false;
         setIsAnimating(true);
+        setDissolveIndex(0);
 
         const lines = contentTo2D(content);
         const totalChars = lines.reduce((sum, line) => sum + line.length, 0);
@@ -224,6 +227,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
             }
 
             setDisplayContent(flatten2D(workingLines));
+            setDissolveIndex(curFixer);
 
             if (!halfwayTriggered && curFixer >= totalChars / 2 && onHalfway) {
                 halfwayTriggered = true;
@@ -233,6 +237,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
             if (curFixer < totalChars) {
                 animationRef.current = requestAnimationFrame(animate);
             } else {
+                setDissolveIndex(totalChars);
                 setTimeout(() => {
                     setDisplayContent('');
                     setIsAnimating(false);
@@ -259,7 +264,7 @@ const useShuffleEffect = (content: string, options: ShuffleTextOptions = {}) => 
         };
     }, []);
 
-    return { displayContent, appear, dissolve, isAnimating, cancel };
+    return { displayContent, appear, dissolve, isAnimating, cancel, dissolveIndex };
 };
 
 export default useShuffleEffect;

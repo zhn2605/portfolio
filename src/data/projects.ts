@@ -43,7 +43,20 @@ export const projects: ProjectData[] = [
   {
     id: 'ss',
     name: 'sheet-sharp',
-    description: 'Musical code? Coding music? Written in Rodio.',
+    description: 'Musical code or Coding music?',
     links: [{ label: 'github', url: 'https://github.com/zhn2605/sheet-sharp' }],
+  },
+  {
+    id: 'es',
+    name: 'emote-singer',
+    description: 'Silly emote that sings based on dsp audio features.',
+    links: [{ label: 'github', url: 'https://github.com/zhn2605/emote-singer' }],
+  },
+  {
+    id: 'alice',
+    name: 'alice',
+    description: 'Automated product item tracker and notifier for e-commerce platforms.',
+    links: [{ label: 'github', url: 'https://github.com/zhn2605/alice' }],
+    media: { type: 'image', src: '/projects/alice.png' },
   },
 ];

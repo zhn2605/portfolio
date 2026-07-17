@@ -27,7 +27,12 @@ const extractText = (node: React.ReactNode): string => {
 };
 
 // apply effect to ReactNode structure
-const applyShuffledText = (node: React.ReactNode, shuffledText: string, indexRef: { current: number }): React.ReactNode => {
+const applyShuffledText = (
+  node: React.ReactNode,
+  shuffledText: string,
+  indexRef: { current: number },
+  dissolveIndex: number | null,
+): React.ReactNode => {
   if (typeof node === 'string') {
     const length = node.length;
     const result = shuffledText.slice(indexRef.current, indexRef.current + length);
@@ -45,7 +50,7 @@ const applyShuffledText = (node: React.ReactNode, shuffledText: string, indexRef
 
   if (Array.isArray(node)) {
     return node.map((child, index) => {
-      const processed = applyShuffledText(child, shuffledText, indexRef);
+      const processed = applyShuffledText(child, shuffledText, indexRef, dissolveIndex);
       if (React.isValidElement(processed) && processed.key != null) {
         return processed;
       }
@@ -54,8 +59,17 @@ const applyShuffledText = (node: React.ReactNode, shuffledText: string, indexRef
   }
 
   if (React.isValidElement(node)) {
+    const startIndex = indexRef.current;
     const props = node.props as any;
-    const children = applyShuffledText(props.children, shuffledText, indexRef);
+    const children = applyShuffledText(props.children, shuffledText, indexRef, dissolveIndex);
+    const isNonTextLeaf = indexRef.current === startIndex;
+    const shouldHide = isNonTextLeaf && dissolveIndex !== null && dissolveIndex >= startIndex;
+
+    if (shouldHide) {
+      const mergedStyle = { ...(props.style || {}), opacity: 0 };
+      return React.cloneElement(node as React.ReactElement<any>, { key: node.key, style: mergedStyle }, children);
+    }
+
     return React.cloneElement(node, { key: node.key }, children);
   }
 
@@ -72,7 +86,7 @@ export const TerminalLayer = ({
     autoAppear = false
 }: TerminalLayerProps) => {
     const content = extractText(children);
-    const { displayContent, appear, dissolve, isAnimating, cancel } = useShuffleEffect(content, {
+    const { displayContent, appear, dissolve, isAnimating, cancel, dissolveIndex } = useShuffleEffect(content, {
         lookupInitialSpeed,
         fixerInitialSpeed,
     });
@@ -103,7 +117,7 @@ export const TerminalLayer = ({
         };
     }, []);
 
-    const renderedContent = applyShuffledText(children, displayContent, { current: 0 });
+    const renderedContent = applyShuffledText(children, displayContent, { current: 0 }, dissolveIndex);
 
     return (
         <div
