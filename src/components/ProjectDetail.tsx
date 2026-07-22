@@ -1,7 +1,9 @@
-import Image from 'next/image';
 import { ProjectData } from '@/data/projects';
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
 export function getProjectContent(project: ProjectData) {
+  const mediaSrc = project.media ? `${BASE_PATH}${project.media.src}` : '';
   return (
     <>
       <div key="title" className="font-title text-title">
@@ -10,17 +12,10 @@ export function getProjectContent(project: ProjectData) {
       {project.media ? (
         <div key="media" className="w-full pb-[2vw]">
           {project.media.type === 'image' && (
-            <Image
-              src={project.media.src}
-              alt={project.name}
-              width={1600}
-              height={900}
-              className="w-full h-auto object-cover"
-              unoptimized
-            />
+            <img src={mediaSrc} alt={project.name} className="w-full object-cover" />
           )}
           {project.media.type === 'video' && (
-            <video src={project.media.src} controls className="w-full" />
+            <video src={mediaSrc} controls className="w-full" />
           )}
         </div>
       ) : (
