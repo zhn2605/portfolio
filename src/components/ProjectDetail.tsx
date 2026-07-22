@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { ProjectData } from '@/data/projects';
 
 export function getProjectContent(project: ProjectData) {
@@ -9,7 +10,14 @@ export function getProjectContent(project: ProjectData) {
       {project.media ? (
         <div key="media" className="w-full pb-[2vw]">
           {project.media.type === 'image' && (
-            <img src={project.media.src} alt={project.name} className="w-full object-cover" />
+            <Image
+              src={project.media.src}
+              alt={project.name}
+              width={1600}
+              height={900}
+              className="w-full h-auto object-cover"
+              unoptimized
+            />
           )}
           {project.media.type === 'video' && (
             <video src={project.media.src} controls className="w-full" />
