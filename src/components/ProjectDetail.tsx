@@ -1,6 +1,6 @@
 import { ProjectData } from '@/data/projects';
 
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/portfolio' : '';
 
 export function getProjectContent(project: ProjectData) {
   const mediaSrc = project.media ? `${BASE_PATH}${project.media.src}` : '';
